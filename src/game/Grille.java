@@ -30,20 +30,16 @@ public class Grille {
 
     public static Grille initRandomMap(int height, int width) {
         final int[][] internalMap = new int[height][width];
-        applyOnMap(height, width, new CallMe() {
-            public void call(int x, int y) {
-                internalMap[x][y] = random.nextInt(2);
-            }
+        applyOnMap(height, width, (x, y) -> {
+            internalMap[x][y] = random.nextInt(2);
         });
         return new Grille(height, width, internalMap);
     }
 
     public static Grille initClearMap(int height, int width) {
         final int[][] internalMap = new int[height][width];
-        applyOnMap(height, width, new CallMe() {
-            public void call(int x, int y) {
-                internalMap[x][y] = 0;
-            }
+        applyOnMap(height, width, (x, y) -> {
+            internalMap[x][y] = 0;
         });
         return new Grille(height, width, internalMap);
     }
@@ -72,38 +68,32 @@ public class Grille {
         final AtomicInteger counter = new AtomicInteger(0);
         counter.addAndGet(-map[cellX][cellY]);
 
-        applyOnMap(3, 3, new CallMe() {
-            public void call(int x, int y) {
-                int i = (x + cellX - 1 + height) % height;
-                int j = (y + cellY - 1 + width) % width;
-                counter.addAndGet(map[i][j]);
-            }
+        applyOnMap(3, 3, (x, y) -> {
+            int i = (x + cellX - 1 + height) % height;
+            int j = (y + cellY - 1 + width) % width;
+            counter.addAndGet(map[i][j]);
         });
         return counter.get();
     }
 
     public Grille step() {
         final Grille newGrille = initClearMap(height, width);
-        applyOnMap(height, width, new CallMe() {
-            public void call(int x, int y) {
-                int numberOfNeightbours = Grille.this.neighboursCounter(x, y);
-                int currentStatus = Grille.this.map[x][y];
-                int newState = statusMatrix[currentStatus][numberOfNeightbours];
-                newGrille.setCell(x, y, newState);
-            }
+        applyOnMap(height, width, (int x, int y) -> {
+            int numberOfNeightbours = Grille.this.neighboursCounter(x, y);
+            int currentStatus = Grille.this.map[x][y];
+            int newState = statusMatrix[currentStatus][numberOfNeightbours];
+            newGrille.setCell(x, y, newState);
         });
         return newGrille;
     }
 
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        applyOnMap(height, width, new CallMe() {
-            public void call(int x, int y) {
-                if (y == 0) {
-                    builder.append('\n');
-                }
-                builder.append(map[x][y]);
+        applyOnMap(height, width, (x, y) -> {
+            if (y == 0) {
+                builder.append('\n');
             }
+            builder.append(map[x][y]);
         });
         return builder.toString();
     }
