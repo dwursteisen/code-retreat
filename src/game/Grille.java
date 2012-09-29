@@ -10,10 +10,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class Grille {
 
-    private final int[][] map;
     private static final Random random = new Random();
-    int h;
-    int w;
+
+    // (etat courant, nombre voisin) -> nouvel etat
+    private static final int[][] statusMatrix = new int[][]{
+            {0, 0, 0, 1, 0, 0, 0, 0, 0},
+            {0, 0, 1, 1, 0, 0, 0, 0, 0}
+    };
+
+    private final int[][] map;
+    private final int h;
+    private final int w;
 
     private Grille(int h, int w, int[][] map) {
         this.h = h;
@@ -56,11 +63,6 @@ public class Grille {
             }
     }
 
-    private static interface CallMe {
-        void call(int x, int y);
-    }
-
-
     public void setCell(int x, int y, int val) {
         map[x][y] = val;
     }
@@ -93,12 +95,6 @@ public class Grille {
         return newGrille;
     }
 
-    // (etat courant, nombre voisin) -> nouvel etat
-    private static final int[][] statusMatrix = new int[][]{
-            {0, 0, 0, 1, 0, 0, 0, 0, 0},
-            {0, 0, 1, 1, 0, 0, 0, 0, 0}
-    };
-
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         applyOnMap(map.length, map[0].length, new CallMe() {
@@ -107,7 +103,6 @@ public class Grille {
                     builder.append('\n');
                 }
                 builder.append(map[x][y]);
-
             }
         });
         return builder.toString();
