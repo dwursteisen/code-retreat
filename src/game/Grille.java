@@ -1,7 +1,5 @@
 package game;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,49 +10,50 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class Grille {
 
-    private int[][] map;
-    private final Random random = new Random();
+    private final int[][] map;
+    private static final Random random = new Random();
     int h;
     int w;
 
-    public Grille initRandomMap(int h, int w) {
+    private Grille(int h, int w, int[][] map) {
         this.h = h;
         this.w = w;
-        map = new int[h][w];
-        applyOnMap(h, w, new CallMe() {
-            public void call(int x, int y) {
-                map[x][y] = random.nextInt(2);
-            }
-        });
-        return this;
-
+        this.map = map;
     }
 
-    public Grille initClearMap(int h, int w) {
-        map = new int[h][w];
-        this.h = h;
-        this.w = w;
+    public static Grille initRandomMap(int h, int w) {
+        final int[][] internalMap = new int[h][w];
         applyOnMap(h, w, new CallMe() {
             public void call(int x, int y) {
-                map[x][y] = 0;
+                internalMap[x][y] = random.nextInt(2);
             }
         });
-        return this;
+        return new Grille(h, w, internalMap);
     }
 
-    public void applyOnMap(int h, int w, CallMe method) {
+    public static Grille initClearMap(int h, int w) {
+        final int[][] internalMap = new int[h][w];
+        applyOnMap(h, w, new CallMe() {
+            public void call(int x, int y) {
+                internalMap[x][y] = 0;
+            }
+        });
+        return new Grille(h, w, internalMap);
+    }
+
+    public static Grille initOscillateurMap(int h, int w) {
+        Grille grille = initClearMap(h, w);
+        grille.setCell(3, 1, 1);
+        grille.setCell(3, 2, 1);
+        grille.setCell(3, 3, 1);
+        return grille;
+    }
+
+    public static void applyOnMap(int h, int w, CallMe method) {
         for (int i = 0; i < h; i++)
             for (int j = 0; j < w; j++) {
                 method.call(i, j);
             }
-    }
-
-    public Grille initOcialteurMap(int i, int i1) {
-        initClearMap(i, i1);
-        map[0][1] = 1;
-        map[0][2] = 1;
-        map[0][3] = 1;
-        return this;
     }
 
     private static interface CallMe {
@@ -85,30 +84,20 @@ public class Grille {
         final Grille newGrille = initClearMap(h, w);
         applyOnMap(h, w, new CallMe() {
             public void call(int x, int y) {
-                int val = Grille.this.neighboursCounter(x, y);
-                int newState = newStatus.get(val).intValue();
+                int numberOfNeightbours = Grille.this.neighboursCounter(x, y);
+                int currentStatus = Grille.this.map[x][y];
+                int newState = statusMatrix[currentStatus][numberOfNeightbours];
                 newGrille.setCell(x, y, newState);
             }
         });
         return newGrille;
     }
 
-    // voisin, futur etat
-    private static final Map<Integer, Integer> newStatus = new HashMap<Integer, Integer>();
-
-    static {
-        newStatus.put(0, 0);
-        newStatus.put(1, 0);
-        newStatus.put(2, 0);
-        newStatus.put(3, 1);
-        newStatus.put(4, 0);
-        newStatus.put(5, 0);
-        newStatus.put(6, 0);
-        newStatus.put(7, 0);
-        newStatus.put(8, 0);
-
-    }
-
+    // (etat courant, nombre voisin) -> nouvel etat
+    private static final int[][] statusMatrix = new int[][]{
+            {0, 0, 0, 1, 0, 0, 0, 0, 0},
+            {0, 0, 1, 1, 0, 0, 0, 0, 0}
+    };
 
     public String toString() {
         final StringBuilder builder = new StringBuilder();
