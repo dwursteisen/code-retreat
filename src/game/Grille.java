@@ -19,46 +19,46 @@ public class Grille {
     };
 
     private final int[][] map;
-    private final int h;
-    private final int w;
+    private final int height;
+    private final int width;
 
-    private Grille(int h, int w, int[][] map) {
-        this.h = h;
-        this.w = w;
+    private Grille(int height, int width, int[][] map) {
+        this.height = height;
+        this.width = width;
         this.map = map;
     }
 
-    public static Grille initRandomMap(int h, int w) {
-        final int[][] internalMap = new int[h][w];
-        applyOnMap(h, w, new CallMe() {
+    public static Grille initRandomMap(int height, int width) {
+        final int[][] internalMap = new int[height][width];
+        applyOnMap(height, width, new CallMe() {
             public void call(int x, int y) {
                 internalMap[x][y] = random.nextInt(2);
             }
         });
-        return new Grille(h, w, internalMap);
+        return new Grille(height, width, internalMap);
     }
 
-    public static Grille initClearMap(int h, int w) {
-        final int[][] internalMap = new int[h][w];
-        applyOnMap(h, w, new CallMe() {
+    public static Grille initClearMap(int height, int width) {
+        final int[][] internalMap = new int[height][width];
+        applyOnMap(height, width, new CallMe() {
             public void call(int x, int y) {
                 internalMap[x][y] = 0;
             }
         });
-        return new Grille(h, w, internalMap);
+        return new Grille(height, width, internalMap);
     }
 
-    public static Grille initOscillateurMap(int h, int w) {
-        Grille grille = initClearMap(h, w);
+    public static Grille initOscillateurMap(int height, int width) {
+        Grille grille = initClearMap(height, width);
         grille.setCell(3, 1, 1);
         grille.setCell(3, 2, 1);
         grille.setCell(3, 3, 1);
         return grille;
     }
 
-    public static void applyOnMap(int h, int w, CallMe method) {
-        for (int i = 0; i < h; i++)
-            for (int j = 0; j < w; j++) {
+    public static void applyOnMap(int height, int width, CallMe method) {
+        for (int i = 0; i < height; i++)
+            for (int j = 0; j < width; j++) {
                 method.call(i, j);
             }
     }
@@ -74,8 +74,8 @@ public class Grille {
 
         applyOnMap(3, 3, new CallMe() {
             public void call(int x, int y) {
-                int i = (x + cellX - 1 + h) % h;
-                int j = (y + cellY - 1 + w) % w;
+                int i = (x + cellX - 1 + height) % height;
+                int j = (y + cellY - 1 + width) % width;
                 counter.addAndGet(map[i][j]);
             }
         });
@@ -83,8 +83,8 @@ public class Grille {
     }
 
     public Grille step() {
-        final Grille newGrille = initClearMap(h, w);
-        applyOnMap(h, w, new CallMe() {
+        final Grille newGrille = initClearMap(height, width);
+        applyOnMap(height, width, new CallMe() {
             public void call(int x, int y) {
                 int numberOfNeightbours = Grille.this.neighboursCounter(x, y);
                 int currentStatus = Grille.this.map[x][y];
@@ -97,7 +97,7 @@ public class Grille {
 
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        applyOnMap(map.length, map[0].length, new CallMe() {
+        applyOnMap(height, width, new CallMe() {
             public void call(int x, int y) {
                 if (y == 0) {
                     builder.append('\n');
